@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <cstring>
 
-#include <iostream>
-
 void Influx::Field::set(const char*k, const char *v) 
 {
     strcpy(this->key, k);
@@ -17,7 +15,6 @@ void Influx::Field::set(const char *k, const float v)
 }
 void Influx::Field::cat(char *buf, const char* prefix) const
 {
-    std::cout << "Appending field \"" << this->key << "=" << this->val << "\" Onto buf='" << buf << "'" << std::endl;
     if (prefix != nullptr) {
         strcat(buf, prefix);
     }
@@ -70,7 +67,9 @@ void Influx::Point::set_tag(const char *k, const char *v)
     }
 
     this->tags[idx].set(k, v);
-    this->tag_count++;
+    if (!found) {
+        this->tag_count++;
+    }
 }
 
 void Influx::Point::set_field(const char *k, const char *v)
@@ -91,7 +90,9 @@ void Influx::Point::set_field(const char *k, const char *v)
     }
 
     this->fields[idx].set(k, v);
-    this->field_count++;
+    if (!found) {
+        this->field_count++;
+    }
 }
 
 void Influx::Point::set_field(const char *k, const float v)
@@ -112,7 +113,9 @@ void Influx::Point::set_field(const char *k, const float v)
     }
 
     this->fields[idx].set(k, v);
-    this->field_count++;
+    if (!found) {
+        this->field_count++;
+    }
 }
 
 

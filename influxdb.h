@@ -13,8 +13,8 @@
 namespace Influx {
 class Field {
 public:
-    char key[16] = "";
-    char val[16] = "";
+    char key[32] = "";
+    char val[64] = "";
 
     void set(const char *k, const char *v);
     void set(const char *k, const float v);
