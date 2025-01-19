@@ -1,125 +1,41 @@
 #include "influxdb.h"
-
-#include <stdio.h>
 #include <cstring>
+#include <cstdio>
 
-void Influx::Field::set(const char*k, const char *v) 
+Influx::InfluxDbClient::InfluxDbClient(const char* host, const char *org, const char *bucket, const char *token)
 {
-    strcpy(this->key, k);
-    strcpy(this->val, v);
-}
-void Influx::Field::set(const char *k, const float v)
-{
-    strcpy(this->key, k);
-    sprintf(this->val, "%.6f", v);
-}
-void Influx::Field::cat(char *buf, const char* prefix) const
-{
-    if (prefix != nullptr) {
-        strcat(buf, prefix);
-    }
-    strcat(buf, this->key);
-    strcat(buf, "=");
-    strcat(buf, this->val);
+    strcpy(this->host, host);
+    strcpy(this->org, org);
+    strcpy(this->bucket, bucket);
+    strcpy(this->token, token);
 }
 
-void Influx::Point::cat(char *buf) const 
-{
-    strcat(buf, this->measurement);
-    for (size_t idx=0; idx < this->tag_count; idx++)
-    {
-        this->tags[idx].cat(buf);
-    }
-    bool first_field = true;
-    for (size_t idx=0; idx < this->field_count; idx++)
-    {
-        if (first_field)
-        {
-            this->fields[idx].cat(buf, " ");
-            first_field = false;
-        }
-        else 
-        {
-            this->fields[idx].cat(buf, ",");
-        }
-    }
-    strcat(buf, " ");
-    
-    sprintf(buf+strlen(buf), "%ld", this->timestamp);
-    strcat(buf, "\n");
+void Influx::InfluxDbClient::cat_http_preamble(char *buf, const size_t body_len) const {
+    strcat(buf, "POST /api/v2/write?org=");
+    strcat(buf, this->org);
+    strcat(buf, "&bucket=");
+    strcat(buf, this->bucket);
+    strcat(buf, "&precision=ns HTTP/1.1\n");
+    strcat(buf, "Host: ");
+    strcat(buf, this->host); // TODO: strip the protocol portion
+    strcat(buf, "\nAuthorization: token ");
+    strcat(buf, this->token);
+    strcat(buf, "\nUser-Agent: arduino");
+    strcat(buf, "\nContent-Type: text/plain");
+    strcat(buf, "\nAccept: application/json");
+    char tmp[32];
+    tmp[0] = '\0';
+    sprintf(tmp, "%ld", body_len);
+    strcat(buf, "\nContent-Length: ");
+    strcat(buf, tmp);
+    strcat(buf, "\n\n");
 }
 
-void Influx::Point::set_tag(const char *k, const char *v)
-{
-    // Check if an existing tag has this key
-    size_t idx = 0;
-    bool found = false;
-    for (idx = 0; idx < this->tag_count; idx++)
-    {
-        if (strcmp(this->tags[idx].key, k) == 0) 
-        {
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
-        idx = this->tag_count;
-    }
-
-    this->tags[idx].set(k, v);
-    if (!found) {
-        this->tag_count++;
-    }
-}
-
-void Influx::Point::set_field(const char *k, const char *v)
-{
-    // Check if an existing tag has this key
-    size_t idx = 0;
-    bool found = false;
-    for (idx = 0; idx < this->field_count; idx++)
-    {
-        if (strcmp(this->fields[idx].key, k) == 0) 
-        {
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
-        idx = this->field_count;
-    }
-
-    this->fields[idx].set(k, v);
-    if (!found) {
-        this->field_count++;
-    }
-}
-
-void Influx::Point::set_field(const char *k, const float v)
-{
-    // Check if an existing tag has this key
-    size_t idx = 0;
-    bool found = false;
-    for (idx = 0; idx < this->field_count; idx++)
-    {
-        if (strcmp(this->fields[idx].key, k) == 0) 
-        {
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
-        idx = this->field_count;
-    }
-
-    this->fields[idx].set(k, v);
-    if (!found) {
-        this->field_count++;
-    }
-}
-
-
-void Influx::Point::set_measurement(const char *m)
-{
-    strcpy(this->measurement, m);
+void Influx::InfluxDbClient::to_http_request(char *buf, const Point &p) const {
+    // Compose the body portion first in order to calculate the content length header
+    char body_buf[1024];
+    body_buf[0] = '\0';
+    p.cat(body_buf);
+    this->cat_http_preamble(buf, strlen(body_buf));
+    strcat(buf, body_buf);
 }
