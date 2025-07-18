@@ -1,6 +1,6 @@
 #include "keyvalpair.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <cstring>
 
 void Influx::KeyValPair::reset() {
@@ -19,12 +19,12 @@ void Influx::KeyValPair::set(const char* k, const int v) {
 }
 void float_to_str(const float f, char *buf) {
     const char *tmp_sign = (f < 0.0f) ? "-" : "";
-    float tmp_val = (f < 0) ? -f : f;
-    int tmpInt = tmp_val; // extract the integer part
-    int tmpDecimal = (tmp_val - tmpInt) * 10000.0; // extract 4 digits of the right-hand-side
+    const float tmp_val = (f < 0) ? -f : f;
+    const int tmpInt = tmp_val; // extract the integer part
+    const int tmpDecimal = (tmp_val - tmpInt) * 10000.0; // extract 4 digits of the right-hand-side
     sprintf(buf, "%s%d.%d", tmp_sign, tmpInt, tmpDecimal);
-
 }
+
 void Influx::KeyValPair::set(const char* k, const float v) {
     strcpy(this->key, k);
     this->val[0] = '\0';

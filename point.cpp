@@ -23,6 +23,7 @@ void Influx::Point::cat(char *buf) const
             this->fields[idx].cat(buf, ",");
         }
     }
+
     strcat(buf, " ");
     
     sprintf(buf+strlen(buf), "%ld", this->timestamp);

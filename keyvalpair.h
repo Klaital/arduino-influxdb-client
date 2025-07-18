@@ -1,7 +1,7 @@
-namespace Influx {
 
 #ifndef KEYVALPAIR_H
 #define KEYVALPAIR_H
+namespace Influx {
 
 #ifndef KEYVALPAIR_MAX_KEY_LEN
 #define KEYVALPAIR_MAX_KEY_LEN 32

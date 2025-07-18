@@ -1,5 +1,9 @@
 #ifndef INFLUX_POINT_H
 #define INFLUX_POINT_H
+#include "keyvalpair.h"
+#include <cstring>
+
+namespace Influx {
 
 #ifndef INFLUX_POINT_MAX_TAGS_LEN
 #define INFLUX_POINT_MAX_TAGS_LEN 128
@@ -8,10 +12,7 @@
 #define INFLUX_POINT_MAX_TAGS 8
 #endif
 
-#include "keyvalpair.h"
-#include <cstring>
 
-namespace Influx {
 class Point {
     KeyValPair tags[INFLUX_POINT_MAX_TAGS];
     size_t tag_count = 0;

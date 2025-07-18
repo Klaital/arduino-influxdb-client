@@ -3,6 +3,8 @@
 
 
 #include "point.h"
+#include <ArduinoHttpClient.h>
+#include <WiFiNINA.h>
 
 namespace Influx {
 class InfluxDbClient {
@@ -10,10 +12,10 @@ class InfluxDbClient {
     char org[64] = "";
     char token[128] = "";
     char bucket[64] = "";
+    HttpClient *client;
 public:
-    InfluxDbClient(const char* host, const char* org, const char* bucket, const char* token);
-    void cat_http_preamble(char *buf, size_t body_len) const;
-    void to_http_request(char* buf, const Point& p) const;
+    InfluxDbClient(WiFiClient &wifi, const char* host, int port, const char* org, const char* bucket, const char* token);
+    int send(const Point& p);
 };
 }
 #endif
